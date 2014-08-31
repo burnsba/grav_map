@@ -1,0 +1,74 @@
+- uses GDAL and imagemagick
+
+download latest gravity image
+    wget ftp://topex.ucsd.edu/pub/global_grav_1min/grav.img.22.1
+
+set scale and file paths in source, compile, run
+
+(no scale, output bitmap is 1,119,744,054 bytes)
+
+    gcc -std='c99' grav.c
+    ./a.out
+
+flip bitmap to right side up
+
+    convert grav_22.bmp -flip grav_22_f.bmp
+
+Figure out source bounds using cs2cs. Input is repeated on the next
+line and the transformation is included. These are passed as a parameter
+to gdal_translate
+
+    $ cs2cs -E +proj=latlong +datum=WGS84 +to +proj=merc +datum=WGS84 -v
+    # ---- From Coordinate System ----
+    #Lat/long (Geodetic alias)
+    #
+    # +proj=latlong +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0
+    # ---- To Coordinate System ----
+    #Mercator
+    #       Cyl, Sph&Ell
+    #       lat_ts=
+    # +proj=merc +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0
+    -180 80.738
+    -180 80.738     -20037508.34    15987767.74 0.00
+    180 -80.738
+    180 -80.738     20037508.34     -15987767.74 0.00
+
+create geotiff and specify coordinate bounds
+
+    gdal_translate -a_srs '+proj=merc +datum=WGS84' -a_ullr -20037508 15987768 20037508 -15987768 grav_22_f.bmp grav_22.tif
+
+save http://spatialreference.org/ref/esri/54030/ogcwkt/ to robinson_ogcwkt.txt
+transform from Mercator to Robinson projection (this command took about 51 minutes to complete)
+
+    gdalwarp --debug on -wo SOURCE_EXTRA=125 -t_srs robinson_ogcwkt.txt -dstalpha grav_22.tif grav_robinson_22.tif
+
+get image dimensions. look at debug output from above:
+
+    Creating output file that is 35518P x 17032L.
+    
+So 35,518 x 17,032
+
+Since posters are at relatively low resolution, 300 PPI should be more than enough. 36"x300PPI = 10,800pixels
+Resize down to 10,800 pixel width and keep the aspect ratio (2.4GB to 223MB)
+
+    convert grav_robinson_22.tif -resize 10800x5179 grav_robinson_22_p.tif
+    
+    
+    
+Once that finished, I opened the file in GIMP and created the border outline of the world map and spent a very long time creating the color bar legend.
+
+Applied a one pixel Gaussian blur to clean up the points with no data.
+
+Once I got the title and credits text in (http://opinionator.blogs.nytimes.com/2012/08/08/hear-all-ye-people-hearken-o-earth/?_php=true&_type=blogs&_r=0), I learned that GIMP couldn't export to PDF with embedded fonts.
+
+Recreated the image in scribus, very nice tool.
+
+----
+
+
+Marine Gravity from Satellite Altimetry
+
+D. T. Sandwell, E. Garcia, K. Soofi, P. Wessel, M. Chandler, W. H. F. Smith
+http://topex.ucsd.edu/WWW_html/mar_grav.html
+
+Data available at ftp://topex.ucsd.edu/pub/global_grav_1min/
