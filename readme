@@ -59,7 +59,7 @@ Once that finished, I opened the file in GIMP and created the border outline of 
 
 Applied a one pixel Gaussian blur to clean up the points with no data.
 
-Once I got the title and credits text in (http://opinionator.blogs.nytimes.com/2012/08/08/hear-all-ye-people-hearken-o-earth/?_php=true&_type=blogs&_r=0), I learned that GIMP couldn't export to PDF with embedded fonts.
+Once I got the title and credits text in (http://opinionator.blogs.nytimes.com/2012/08/08/hear-all-ye-people-hearken-o-earth/?_php=true&_type=blogs&_r=0 -- decided on Georgia font), I learned that GIMP couldn't export to PDF with embedded fonts.
 
 Recreated the image in scribus, very nice tool.
 
